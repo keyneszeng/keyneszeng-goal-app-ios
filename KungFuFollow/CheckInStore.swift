@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 struct CheckIn: Identifiable, Codable, Hashable {
@@ -18,11 +19,14 @@ struct CheckIn: Identifiable, Codable, Hashable {
 
 @MainActor
 final class CheckInStore: ObservableObject {
+    @Published private(set) var routines: [KungFuRoutine] = KungFuRoutine.samples
     @Published private(set) var checkIns: [CheckIn] = [] {
         didSet { save() }
     }
+    @Published private(set) var syncMessage: String?
 
     private let storageKey = "kungfu.checkins.v1"
+    private let apiClient = APIClient()
 
     init() {
         guard
@@ -31,6 +35,21 @@ final class CheckInStore: ObservableObject {
         else { return }
 
         checkIns = decoded.sorted { $0.practicedAt > $1.practicedAt }
+    }
+
+    func refresh() async {
+        do {
+            async let remoteRoutines = apiClient.fetchRoutines()
+            async let remoteCheckIns = apiClient.fetchCheckIns()
+            let fetchedRoutines = try await remoteRoutines
+            let fetchedCheckIns = try await remoteCheckIns
+            routines = fetchedRoutines
+            checkIns = fetchedCheckIns.sorted { $0.practicedAt > $1.practicedAt }
+            syncMessage = nil
+        } catch {
+            routines = KungFuRoutine.samples
+            syncMessage = "后端暂不可用，当前展示本地示例数据。"
+        }
     }
 
     var streakDays: Int {
@@ -55,7 +74,21 @@ final class CheckInStore: ObservableObject {
         }
     }
 
-    func add(_ routine: KungFuRoutine) {
+    func complete(_ routine: KungFuRoutine) async {
+        guard !hasCheckedInToday(for: routine) else { return }
+
+        do {
+            let remoteCheckIn = try await apiClient.createCheckIn(for: routine)
+            checkIns.insert(remoteCheckIn, at: 0)
+            syncMessage = nil
+        } catch {
+            let checkIn = CheckIn(routineID: routine.id, routineTitle: routine.title, minutes: routine.duration)
+            checkIns.insert(checkIn, at: 0)
+            syncMessage = "后端暂不可用，本次打卡已先保存在本机。"
+        }
+    }
+
+    func addLocal(_ routine: KungFuRoutine) {
         guard !hasCheckedInToday(for: routine) else { return }
         let checkIn = CheckIn(routineID: routine.id, routineTitle: routine.title, minutes: routine.duration)
         checkIns.insert(checkIn, at: 0)

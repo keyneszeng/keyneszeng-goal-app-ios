@@ -12,6 +12,7 @@
 		8A7B2C142C00000100A1B001 /* TrainingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7B2C132C00000100A1B001 /* TrainingModels.swift */; };
 		8A7B2C162C00000100A1B001 /* PracticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7B2C152C00000100A1B001 /* PracticeView.swift */; };
 		8A7B2C182C00000100A1B001 /* CheckInStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7B2C172C00000100A1B001 /* CheckInStore.swift */; };
+		8A7B2C202C00000100A1B001 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7B2C1F2C00000100A1B001 /* APIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +22,7 @@
 		8A7B2C132C00000100A1B001 /* TrainingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrainingModels.swift; sourceTree = "<group>"; };
 		8A7B2C152C00000100A1B001 /* PracticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PracticeView.swift; sourceTree = "<group>"; };
 		8A7B2C172C00000100A1B001 /* CheckInStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInStore.swift; sourceTree = "<group>"; };
+		8A7B2C1F2C00000100A1B001 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Networking/APIClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 				8A7B2C132C00000100A1B001 /* TrainingModels.swift */,
 				8A7B2C152C00000100A1B001 /* PracticeView.swift */,
 				8A7B2C172C00000100A1B001 /* CheckInStore.swift */,
+				8A7B2C1F2C00000100A1B001 /* APIClient.swift */,
 			);
 			path = KungFuFollow;
 			sourceTree = "<group>";
@@ -136,6 +139,7 @@
 				8A7B2C142C00000100A1B001 /* TrainingModels.swift in Sources */,
 				8A7B2C162C00000100A1B001 /* PracticeView.swift in Sources */,
 				8A7B2C182C00000100A1B001 /* CheckInStore.swift in Sources */,
+				8A7B2C202C00000100A1B001 /* APIClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

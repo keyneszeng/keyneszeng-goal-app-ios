@@ -2,7 +2,6 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject private var checkIns: CheckInStore
-    private let routines = KungFuRoutine.samples
 
     var body: some View {
         TabView {
@@ -11,11 +10,15 @@ struct ContentView: View {
                     VStack(alignment: .leading, spacing: 22) {
                         HeroHeader(streak: checkIns.streakDays)
 
+                        if let syncMessage = checkIns.syncMessage {
+                            SyncNotice(message: syncMessage)
+                        }
+
                         VStack(alignment: .leading, spacing: 12) {
                             Text("今日跟练")
                                 .font(.title2.bold())
 
-                            ForEach(routines) { routine in
+                            ForEach(checkIns.routines) { routine in
                                 NavigationLink(value: routine) {
                                     RoutineCard(
                                         routine: routine,
@@ -33,6 +36,9 @@ struct ContentView: View {
                 .navigationDestination(for: KungFuRoutine.self) { routine in
                     PracticeView(routine: routine)
                 }
+                .task {
+                    await checkIns.refresh()
+                }
             }
             .tabItem {
                 Label("练功", systemImage: "figure.martial.arts")
@@ -43,6 +49,23 @@ struct ContentView: View {
                     Label("打卡", systemImage: "checkmark.seal")
                 }
         }
+    }
+}
+
+private struct SyncNotice: View {
+    let message: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "wifi.exclamationmark")
+                .foregroundStyle(.orange)
+            Text(message)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .padding(12)
+        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
     }
 }
 

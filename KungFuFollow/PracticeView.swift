@@ -33,7 +33,7 @@ struct PracticeView: View {
                 return move
             }
         }
-        return routine.moves.last ?? MoveCue(name: "收势", seconds: 1, tip: "调整呼吸")
+        return routine.moves.last ?? MoveCue(id: "close", name: "收势", seconds: 1, tip: "调整呼吸")
     }
 
     private var shareText: String {
@@ -100,7 +100,9 @@ struct PracticeView: View {
                     .tint(routine.tint)
 
                     Button {
-                        finishPractice()
+                        Task {
+                            await finishPractice()
+                        }
                     } label: {
                         Label("完成", systemImage: "checkmark")
                             .frame(maxWidth: .infinity)
@@ -125,7 +127,9 @@ struct PracticeView: View {
             if elapsed < totalSeconds {
                 elapsed += 1
             } else {
-                finishPractice()
+                Task {
+                    await finishPractice()
+                }
             }
         }
         .sheet(isPresented: $showCompletion) {
@@ -139,11 +143,11 @@ struct PracticeView: View {
         return "\(remaining / 60):\(String(format: "%02d", remaining % 60))"
     }
 
-    private func finishPractice() {
+    private func finishPractice() async {
         isPracticing = false
         player.pause()
         elapsed = totalSeconds
-        checkIns.add(routine)
+        await checkIns.complete(routine)
         showCompletion = true
     }
 }
