@@ -22,17 +22,26 @@ npm run dev
 
 后端默认运行在 `http://127.0.0.1:3000`，打卡数据会写入 `backend/.data/checkins.json`。
 
+也可以用 Docker 运行：
+
+```bash
+docker compose up --build
+```
+
 ### 启动 iOS
 
 1. 用 Xcode 打开 `KungFuFollow.xcodeproj`
 2. 选择 iPhone 模拟器
 3. 点击 Run
 
+iOS 默认请求 `http://127.0.0.1:3000`。如果要真机联调，把 `KungFuFollow/Info.plist` 里的 `API_BASE_URL` 改成电脑局域网地址，例如 `http://192.168.1.10:3000`。
+
 当前视频使用线上示例 MP4 地址，占位用于验证播放流程。后续可以替换为正式功夫教学短视频资源。
 
 ## API
 
 - `GET /health`：健康检查
+- `GET /api`：接口说明
 - `GET /api/routines`：获取功夫课程
 - `GET /api/checkins?userId=demo-user`：获取用户打卡历史
 - `POST /api/checkins`：提交打卡，参数为 `userId` 和 `routineId`

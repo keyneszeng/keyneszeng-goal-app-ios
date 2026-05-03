@@ -23,3 +23,6 @@ jobs:
       - name: Test
         working-directory: backend
         run: npm test
+
+      - name: Docker build
+        run: docker build -t kungfu-follow-backend ./backend

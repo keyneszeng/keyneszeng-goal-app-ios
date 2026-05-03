@@ -59,3 +59,17 @@ test("deduplicates same routine check-in per day", async () => {
     assert.equal(historyBody.checkIns.length, 1);
   });
 });
+
+test("rejects invalid check-in payloads", async () => {
+  await withServer(async (baseURL) => {
+    const response = await fetch(`${baseURL}/api/checkins`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ userId: "bad user", routineId: "shaolin-foundation" })
+    });
+
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.match(body.error, /userId/);
+  });
+});

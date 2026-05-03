@@ -1,7 +1,7 @@
 import Foundation
 
 struct APIClient {
-    var baseURL: URL = URL(string: "http://127.0.0.1:3000")!
+    var baseURL: URL = APIClient.defaultBaseURL
     var userID: String = "demo-user"
 
     private let session: URLSession
@@ -31,7 +31,9 @@ struct APIClient {
     }
 
     func fetchCheckIns() async throws -> [CheckIn] {
-        let response: CheckInsResponse = try await get("/api/checkins?userId=\(userID)")
+        let response: CheckInsResponse = try await get("/api/checkins", queryItems: [
+            URLQueryItem(name: "userId", value: userID)
+        ])
         return response.checkIns
     }
 
@@ -41,8 +43,8 @@ struct APIClient {
         return response.checkIn
     }
 
-    private func get<Response: Decodable>(_ path: String) async throws -> Response {
-        let request = URLRequest(url: makeURL(path))
+    private func get<Response: Decodable>(_ path: String, queryItems: [URLQueryItem] = []) async throws -> Response {
+        let request = URLRequest(url: makeURL(path, queryItems: queryItems))
         return try await send(request)
     }
 
@@ -54,8 +56,13 @@ struct APIClient {
         return try await send(request)
     }
 
-    private func makeURL(_ path: String) -> URL {
-        URL(string: path, relativeTo: baseURL)!.absoluteURL
+    private func makeURL(_ path: String, queryItems: [URLQueryItem] = []) -> URL {
+        let url = URL(string: path, relativeTo: baseURL)!.absoluteURL
+        guard !queryItems.isEmpty, var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return url
+        }
+        components.queryItems = queryItems
+        return components.url ?? url
     }
 
     private func send<Response: Decodable>(_ request: URLRequest) async throws -> Response {
@@ -67,6 +74,19 @@ struct APIClient {
             throw APIError.requestFailed(httpResponse.statusCode)
         }
         return try decoder.decode(Response.self, from: data)
+    }
+}
+
+private extension APIClient {
+    static var defaultBaseURL: URL {
+        if
+            let configuredURL = Bundle.main.object(forInfoDictionaryKey: "API_BASE_URL") as? String,
+            let url = URL(string: configuredURL),
+            !configuredURL.isEmpty
+        {
+            return url
+        }
+        return URL(string: "http://127.0.0.1:3000")!
     }
 }
 

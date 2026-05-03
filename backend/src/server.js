@@ -5,15 +5,33 @@ import { readJSON, writeJSON } from "./storage.js";
 
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? "0.0.0.0";
+const corsOrigin = process.env.CORS_ORIGIN ?? "*";
 
 function sendJSON(response, status, body) {
   response.writeHead(status, {
     "content-type": "application/json; charset=utf-8",
-    "access-control-allow-origin": "*",
+    "access-control-allow-origin": corsOrigin,
     "access-control-allow-methods": "GET,POST,OPTIONS",
     "access-control-allow-headers": "content-type"
   });
   response.end(JSON.stringify(body));
+}
+
+function docs() {
+  return {
+    service: "kungfu-follow-backend",
+    endpoints: [
+      { method: "GET", path: "/health", description: "健康检查" },
+      { method: "GET", path: "/api/routines", description: "获取功夫课程" },
+      { method: "GET", path: "/api/checkins?userId=demo-user", description: "获取用户打卡历史" },
+      { method: "POST", path: "/api/checkins", description: "提交打卡", body: { userId: "demo-user", routineId: "shaolin-foundation" } },
+      { method: "GET", path: "/api/feed", description: "获取公开打卡动态" }
+    ]
+  };
+}
+
+function badRequest(response, message) {
+  sendJSON(response, 400, { error: message });
 }
 
 function readBody(request) {
@@ -64,6 +82,11 @@ async function handler(request, response) {
       return;
     }
 
+    if (request.method === "GET" && path === "/api") {
+      sendJSON(response, 200, docs());
+      return;
+    }
+
     if (request.method === "GET" && path === "/api/routines") {
       const routines = await readJSON("routines.json", []);
       sendJSON(response, 200, { routines });
@@ -88,6 +111,19 @@ async function handler(request, response) {
       const payload = await readBody(request);
       const userId = String(payload.userId ?? "demo-user");
       const routineId = String(payload.routineId ?? "");
+
+      if (userId.length < 2 || userId.length > 80) {
+        badRequest(response, "userId must be 2-80 characters");
+        return;
+      }
+      if (!/^[a-zA-Z0-9._-]+$/.test(userId)) {
+        badRequest(response, "userId contains unsupported characters");
+        return;
+      }
+      if (!/^[a-zA-Z0-9._-]+$/.test(routineId)) {
+        badRequest(response, "routineId is required");
+        return;
+      }
 
       const [routines, checkIns] = await Promise.all([
         readJSON("routines.json", []),

@@ -1,0 +1,16 @@
+services:
+  api:
+    build:
+      context: ./backend
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3000
+      CORS_ORIGIN: "*"
+      DATA_DIR: /app/.data
+    ports:
+      - "3000:3000"
+    volumes:
+      - kungfu-checkins:/app/.data
+
+volumes:
+  kungfu-checkins:

@@ -21,3 +21,4 @@ fastlane/test_output/
 
 # Backend runtime data
 backend/.data/
+backend/.env
